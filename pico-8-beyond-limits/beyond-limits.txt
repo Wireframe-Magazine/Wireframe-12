@@ -1,0 +1,63 @@
+--load bytes from code data
+function load_data()
+ for i = 0, 255 do
+  local byte = peek(0x5e00+i)
+  for j = 8, 1, -1 do
+   bits[i*8+j] = band(byte, 1)
+   byte = shr(byte, 1)
+  end
+ end
+end
+
+
+--saving
+function save_data()
+ for i = 0, 255 do
+  local byte = 0
+  for j = 1, 8 do
+   byte = shl(byte, 1)
+   byte = bor(byte, bits[i*8+j])
+  end
+  poke(0x5e00+i,byte)
+ end
+end
+
+--convert integers to bits
+function int_to_bits(int, addr, num_bits)
+ for i = 1, num_bits do
+  bits[addr+num_bits-i] = band(int, 1)
+  int = shr(int, 1)
+ end
+end
+
+--convert bits back to integers
+function bits_to_int(addr, num_bits)
+ local int = 0
+ for i = 0, num_bits-1 do
+  int = shl(int, 1)
+  int += bits[addr+i]
+ end
+ return int
+end
+
+
+--saving code to cartridges
+
+--cartridge_1:
+function _update60()
+ if(btnp(?)) load("cartridge_2")
+end
+
+function _draw()
+ ?"1 "
+end
+
+
+--cartridge_2:
+function _update60()
+ if(btnp(???)) load("cartridge_1")
+end
+
+function _draw()
+ ?"2 "
+end
